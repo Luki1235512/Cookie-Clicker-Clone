@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -9,12 +11,14 @@ public class Main {
 
     JLabel counterLabel, perSecLabel;
     JButton button1, button2, button3, button4;
-    int cookieCounter, timerSpeed;
+    int cookieCounter, timerSpeed, cursorNumber, cursorPrice, grandmaNumber, grandmaPrice;
     double perSecond;
-    boolean timerOn;
+    boolean timerOn, grandmaUnlocked;
     Font font1, font2;
     CookieHandler cHandler = new CookieHandler();
     Timer timer;
+    JTextArea messageText;
+    MouseHandler mHandler = new MouseHandler();
 
     public static void main(String[] args) {
         new Main();
@@ -23,8 +27,14 @@ public class Main {
     public Main() {
 
         timerOn = false;
+        grandmaUnlocked = false;
         perSecond = 0;
-        cookieCounter = 0;
+        //TODO: change
+        cookieCounter = 90;
+        cursorNumber = 0;
+        cursorPrice = 10;
+        grandmaNumber = 0;
+        grandmaPrice = 100;
 
         createFont();
         createUI();
@@ -55,6 +65,7 @@ public class Main {
         cookieButton.setBackground(Color.black);
         cookieButton.setFocusPainted(false);
         cookieButton.setBorder(null);
+        cookieButton.setContentAreaFilled(false);
         cookieButton.setIcon(cookie);
         cookieButton.addActionListener(cHandler);
         cookieButton.setActionCommand("cookie");
@@ -87,28 +98,47 @@ public class Main {
         button1.setFocusPainted(false);
         button1.addActionListener(cHandler);
         button1.setActionCommand("Cursor");
+        button1.addMouseListener(mHandler);
         itemPanel.add(button1);
 
         button2 = new JButton("?");
         button2.setFont(font1);
         button2.setFocusPainted(false);
         button2.addActionListener(cHandler);
-        button2.setActionCommand("Cursor");
+        button2.setActionCommand("Grandma");
+        button2.addMouseListener(mHandler);
         itemPanel.add(button2);
 
         button3 = new JButton("?");
         button3.setFont(font1);
         button3.setFocusPainted(false);
         button3.addActionListener(cHandler);
-        button3.setActionCommand("Cursor");
+        button3.setActionCommand("");
+        button3.addMouseListener(mHandler);
         itemPanel.add(button3);
 
         button4 = new JButton("?");
         button4.setFont(font1);
         button4.setFocusPainted(false);
         button4.addActionListener(cHandler);
-        button4.setActionCommand("Cursor");
+        button4.setActionCommand("");
+        button4.addMouseListener(mHandler);
         itemPanel.add(button4);
+
+        JPanel messagePanel = new JPanel();
+        messagePanel.setBounds(500, 70, 250, 150);
+        messagePanel.setBackground(Color.black);
+        window.add(messagePanel);
+
+        messageText = new JTextArea();
+        messageText.setBounds(500, 70, 250, 150);
+        messageText.setForeground(Color.white);
+        messageText.setBackground(Color.black);
+        messageText.setFont(font2);
+        messageText.setLineWrap(true);
+        messageText.setWrapStyleWord(true);
+        messageText.setEditable(false);
+        messagePanel.add(messageText);
 
 
         window.setVisible(true);
@@ -120,6 +150,13 @@ public class Main {
 
             cookieCounter++;
             counterLabel.setText(cookieCounter + " cookies");
+
+            if (!grandmaUnlocked) {
+                if (cookieCounter >= 100) {
+                    grandmaUnlocked = true;
+                    button2.setText("Grandma " + "(" + grandmaNumber + ")");
+                }
+            }
         });
     }
 
@@ -154,12 +191,93 @@ public class Main {
                     counterLabel.setText(cookieCounter + " cookies");
                     break;
                 case "Cursor":
-                    perSecond = perSecond + 0.1;
-                    timerUpdate();
+                    if (cookieCounter >= cursorPrice) {
+                        cookieCounter -= cursorPrice;
+                        cursorPrice += 5;
+                        counterLabel.setText(cookieCounter + " cookies");
+
+                        cursorNumber++;
+                        button1.setText("Cursor " + "(" + cursorNumber + ")");
+                        messageText.setText("Cursor\n[price: " + cursorPrice + "]\nAutoclicks once every 10 seconds");
+                        perSecond = perSecond + 0.1;
+                        timerUpdate();
+                    } else {
+                        messageText.setText("You need more cookies!");
+                    }
+                    break;
+                case "Grandma":
+                    if (cookieCounter >= grandmaPrice) {
+                        cookieCounter -= grandmaPrice;
+                        grandmaPrice += 50;
+                        counterLabel.setText(cookieCounter + " cookies");
+
+                        grandmaNumber++;
+                        button2.setText("Grandma " + "(" + grandmaNumber + ")");
+                        messageText.setText("Grandma\n[price: " + grandmaPrice + "]\nAutoclicks once every 1 second");
+                        perSecond = perSecond + 1;
+                        timerUpdate();
+                    } else {
+                        messageText.setText("You need more cookies!");
+                    }
+                    break;
             }
 
         }
 
+    }
+
+    public class MouseHandler implements MouseListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+            JButton button = (JButton) e.getSource();
+
+            if (button == button1) {
+                messageText.setText("Cursor\n[price: " + cursorPrice + "]\nAutoclicks once every 10 seconds");
+            } else if (button == button2) {
+                if (!grandmaUnlocked) {
+                    messageText.setText("This item is currently locked!");
+                } else {
+                    messageText.setText("Grandma\n[price: " + grandmaPrice + "]\nAutoclicks once every 1 second");
+                }
+
+            } else if (button == button3) {
+                messageText.setText("This item is currently locked!");
+            } else if (button == button4) {
+                messageText.setText("This item is currently locked!");
+            }
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+            JButton button = (JButton) e.getSource();
+            if (button == button1) {
+                messageText.setText(null);
+            } else if (button == button2) {
+                messageText.setText(null);
+            } else if (button == button3) {
+                messageText.setText(null);
+            } else if (button == button4) {
+                messageText.setText(null);
+            }
+        }
     }
 
 }
