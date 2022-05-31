@@ -7,6 +7,8 @@ import java.awt.event.MouseListener;
 import java.util.Locale;
 import java.util.Objects;
 
+// https://cookieclicker.fandom.com/wiki/Building
+
 public class Main {
 
     JLabel counterLabel, perSecLabel;
@@ -186,15 +188,26 @@ public class Main {
     public class CookieHandler implements ActionListener {
 
         public void actionCase(String name, int buildingPrice, int priceInc, double clicksPS, int buildingNumber, JButton button) {
+
             if (cookieCounter >= buildingPrice) {
                 cookieCounter -= buildingPrice;
-                grandmaPrice += priceInc;
+                buildingPrice += priceInc;
                 counterLabel.setText(cookieCounter + " cookies");
 
                 buildingNumber++;
                 button.setText(name + " " + "(" + buildingNumber + ")");
                 messageText.setText(name + "\n[price: " + buildingPrice + "]\nGenerates " + clicksPS + " cookie per second");
                 perSecond += clicksPS;
+
+                if (name.equals("Cursor")) {
+                    cursorPrice = buildingPrice;
+                    cursorNumber = buildingNumber;
+                }
+                if (name.equals("Grandma")) {
+                    grandmaPrice = buildingPrice;
+                    grandmaNumber = buildingNumber;
+                }
+
                 timerUpdate();
             } else {
                 messageText.setText("You need more cookies!");
@@ -210,6 +223,14 @@ public class Main {
                 case "cookie":
                     cookieCounter++;
                     counterLabel.setText(cookieCounter + " cookies");
+
+                    if (!grandmaUnlocked) {
+                        if (cookieCounter >= 100) {
+                            grandmaUnlocked = true;
+                            button2.setText("Grandma " + "(" + grandmaNumber + ")");
+                        }
+                    }
+
                     break;
                 case "Cursor":
                     actionCase("Cursor", cursorPrice, 5, 0.1, cursorNumber, button1);
