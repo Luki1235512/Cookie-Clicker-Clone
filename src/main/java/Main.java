@@ -7,16 +7,14 @@ import java.awt.event.MouseListener;
 import java.util.Locale;
 import java.util.Objects;
 
-// https://cookieclicker.fandom.com/wiki/Building
-
 public class Main {
 
     JLabel counterLabel, perSecLabel;
     JButton button1, button2, button3, button4;
     int cookieCounter, timerSpeed, cursorNumber, cursorPrice, grandmaNumber, grandmaPrice;
-    int farmNumber, farmPrice;
+    int farmNumber, farmPrice, mineNumber, minePrice;
     double perSecond;
-    boolean timerOn, grandmaUnlocked, farmUnlocked;
+    boolean timerOn, grandmaUnlocked, farmUnlocked, mineUnlocked;
     Font font1, font2;
     CookieHandler cHandler = new CookieHandler();
     Timer timer;
@@ -32,16 +30,18 @@ public class Main {
         timerOn = false;
         grandmaUnlocked = false;
         farmUnlocked = false;
+        mineUnlocked = false;
 
         perSecond = 0;
-        //TODO: change
-        cookieCounter = 1090;
+        cookieCounter = 0;
         cursorNumber = 0;
         cursorPrice = 10;
         grandmaNumber = 0;
         grandmaPrice = 100;
         farmNumber = 0;
         farmPrice = 1100;
+        mineNumber = 0;
+        minePrice = 12000;
 
         createFont();
         createUI();
@@ -92,7 +92,7 @@ public class Main {
         button3 = buildingButton("?", "Farm");
         itemPanel.add(button3);
 
-        button4 = buildingButton("?", "");
+        button4 = buildingButton("?", "Mine");
         itemPanel.add(button4);
 
         JPanel messagePanel = new JPanel();
@@ -173,6 +173,15 @@ public class Main {
         }
     }
 
+    public void checkMine() {
+        if (!mineUnlocked) {
+            if (cookieCounter >= 12000) {
+                mineUnlocked = true;
+                button4.setText("Mine (" + mineNumber + ")");
+            }
+        }
+    }
+
     public void setTimer() {
 
         timer = new Timer(timerSpeed, actionListener -> {
@@ -182,6 +191,7 @@ public class Main {
 
             checkGrandma();
             checkFarm();
+            checkMine();
         });
     }
 
@@ -230,6 +240,10 @@ public class Main {
                     farmPrice = buildingPrice;
                     farmNumber = buildingNumber;
                 }
+                if (name.equals("Mine")) {
+                    minePrice = buildingPrice;
+                    mineNumber = buildingNumber;
+                }
 
                 timerUpdate();
             } else {
@@ -249,6 +263,7 @@ public class Main {
 
                     checkGrandma();
                     checkFarm();
+                    checkMine();
 
                     break;
                 case "Cursor":
@@ -259,6 +274,10 @@ public class Main {
                     break;
                 case "Farm":
                     actionCase("Farm", farmPrice, 550, 8, farmNumber, button3);
+                    break;
+                case "Mine":
+                    actionCase("Mine", minePrice, 6000, 47, mineNumber, button4);
+                    break;
             }
 
         }
@@ -304,7 +323,11 @@ public class Main {
                 }
 
             } else if (button == button4) {
-                messageText.setText("This item is currently locked!");
+                if (!mineUnlocked) {
+                    messageText.setText("This item is currently locked!");
+                } else {
+                    messageText.setText("Mine\n[price: " + minePrice + "]\nGenerates 47 cookies per second");
+                }
             }
         }
 
