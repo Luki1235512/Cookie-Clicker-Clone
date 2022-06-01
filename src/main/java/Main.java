@@ -14,8 +14,9 @@ public class Main {
     JLabel counterLabel, perSecLabel;
     JButton button1, button2, button3, button4;
     int cookieCounter, timerSpeed, cursorNumber, cursorPrice, grandmaNumber, grandmaPrice;
+    int farmNumber, farmPrice;
     double perSecond;
-    boolean timerOn, grandmaUnlocked;
+    boolean timerOn, grandmaUnlocked, farmUnlocked;
     Font font1, font2;
     CookieHandler cHandler = new CookieHandler();
     Timer timer;
@@ -30,13 +31,17 @@ public class Main {
 
         timerOn = false;
         grandmaUnlocked = false;
+        farmUnlocked = false;
+
         perSecond = 0;
         //TODO: change
-        cookieCounter = 90;
+        cookieCounter = 1090;
         cursorNumber = 0;
         cursorPrice = 10;
         grandmaNumber = 0;
         grandmaPrice = 100;
+        farmNumber = 0;
+        farmPrice = 1100;
 
         createFont();
         createUI();
@@ -78,13 +83,13 @@ public class Main {
         JPanel itemPanel = customPanel(500, 170, 250, 250, 4, 1);
         window.add(itemPanel);
 
-        button1 = buildingButton("Cursor", "Cursor");
+        button1 = buildingButton("Cursor (0)", "Cursor");
         itemPanel.add(button1);
 
         button2 = buildingButton("?", "Grandma");
         itemPanel.add(button2);
 
-        button3 = buildingButton("?", "");
+        button3 = buildingButton("?", "Farm");
         itemPanel.add(button3);
 
         button4 = buildingButton("?", "");
@@ -150,6 +155,24 @@ public class Main {
         return button;
     }
 
+    public void checkGrandma() {
+        if (!grandmaUnlocked) {
+            if (cookieCounter >= 100) {
+                grandmaUnlocked = true;
+                button2.setText("Grandma (" + grandmaNumber + ")");
+            }
+        }
+    }
+
+    public void checkFarm() {
+        if (!farmUnlocked) {
+            if (cookieCounter >= 1100) {
+                farmUnlocked = true;
+                button3.setText("Farm (" + farmNumber + ")");
+            }
+        }
+    }
+
     public void setTimer() {
 
         timer = new Timer(timerSpeed, actionListener -> {
@@ -157,12 +180,8 @@ public class Main {
             cookieCounter++;
             counterLabel.setText(cookieCounter + " cookies");
 
-            if (!grandmaUnlocked) {
-                if (cookieCounter >= 100) {
-                    grandmaUnlocked = true;
-                    button2.setText("Grandma " + "(" + grandmaNumber + ")");
-                }
-            }
+            checkGrandma();
+            checkFarm();
         });
     }
 
@@ -207,6 +226,10 @@ public class Main {
                     grandmaPrice = buildingPrice;
                     grandmaNumber = buildingNumber;
                 }
+                if (name.equals("Farm")) {
+                    farmPrice = buildingPrice;
+                    farmNumber = buildingNumber;
+                }
 
                 timerUpdate();
             } else {
@@ -224,12 +247,8 @@ public class Main {
                     cookieCounter++;
                     counterLabel.setText(cookieCounter + " cookies");
 
-                    if (!grandmaUnlocked) {
-                        if (cookieCounter >= 100) {
-                            grandmaUnlocked = true;
-                            button2.setText("Grandma " + "(" + grandmaNumber + ")");
-                        }
-                    }
+                    checkGrandma();
+                    checkFarm();
 
                     break;
                 case "Cursor":
@@ -238,6 +257,8 @@ public class Main {
                 case "Grandma":
                     actionCase("Grandma", grandmaPrice, 50, 1, grandmaNumber, button2);
                     break;
+                case "Farm":
+                    actionCase("Farm", farmPrice, 550, 8, farmNumber, button3);
             }
 
         }
@@ -276,7 +297,12 @@ public class Main {
                 }
 
             } else if (button == button3) {
-                messageText.setText("This item is currently locked!");
+                if (!farmUnlocked) {
+                    messageText.setText("This item is currently locked!");
+                } else {
+                    messageText.setText("Farm\n[price: " + farmPrice + "]\nGenerates 8 cookies per second");
+                }
+
             } else if (button == button4) {
                 messageText.setText("This item is currently locked!");
             }
